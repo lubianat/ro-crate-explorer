@@ -234,7 +234,7 @@ const normalizeValues = (val: any) => {
                 <span class="sr-only">Raw JSON</span>
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent class="text-[var(--c-text-muted)] bg-[var(--c-bg-card)] border-[var(--c-border)] max-w-4xl max-h-[80vh] overflow-y-auto">
+            <AlertDialogContent class="text-[var(--c-text-muted)] bg-[var(--c-bg-card)] border-[var(--c-border)] !max-w-4xl max-h-[80vh] overflow-y-auto">
               <AlertDialogHeader>
                 <div class="flex items-center justify-between flex-wrap gap-2">
                   <AlertDialogTitle class="text-[var(--c-text-main)]">Raw JSON-LD</AlertDialogTitle>
