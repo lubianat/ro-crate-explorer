@@ -109,12 +109,41 @@ function displayRaw() {
   if (props.fullCrateJson) {
     return props.fullCrateJson
   }
-  let json_obj = {};
+  let json_obj: Record<string, any> = {};
   json_obj['@id'] = props.id;
   json_obj['@type'] = props.type;
 
   return JSON.stringify(json_obj, null, 2);
 }
+
+// Custom Syntax Highlighting Logic
+const highlightedJson = computed(() => {
+  const json = displayRaw();
+  if (!json) return '';
+
+  // 1. Escape HTML entities to be safe
+  const escaped = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // 2. Regex to match JSON tokens
+  // Matches: Keys, Strings, Booleans, Nulls, Numbers
+  return escaped.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+    let cls = 'text-amber-600 dark:text-amber-400'; // Default: Number
+
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = 'text-[#00A0CC] font-bold'; // Key
+      } else {
+        cls = 'text-emerald-600 dark:text-emerald-400'; // String
+      }
+    } else if (/true|false/.test(match)) {
+      cls = 'text-purple-600 dark:text-purple-400'; // Boolean
+    } else if (/null/.test(match)) {
+      cls = 'text-red-500'; // Null
+    }
+
+    return `<span class="${cls}">${match}</span>`;
+  });
+});
 
 const copyRawJson = async () => {
   const text = displayRaw();
@@ -176,7 +205,9 @@ const normalizeValues = (val: any) => {
                 </div>
                 <AlertDialogDescription class="text-[var(--c-text-muted)]/60">Full source representation.</AlertDialogDescription>
               </AlertDialogHeader>
-              <pre class="whitespace-pre-wrap text-xs bg-[var(--c-bg-app)] text-[var(--c-text-muted)] p-4 rounded-md font-mono overflow-x-auto border border-[var(--c-border)]">{{ displayRaw() }}</pre>
+
+              <pre class="whitespace-pre-wrap text-xs bg-[var(--c-bg-app)] text-[var(--c-text-muted)] p-4 rounded-md font-mono overflow-x-auto border border-[var(--c-border)]" v-html="highlightedJson"></pre>
+
               <AlertDialogFooter>
                 <AlertDialogAction class="bg-[#00A0CC] hover:bg-[#00A0CC]/80 text-white">Close</AlertDialogAction>
               </AlertDialogFooter>
