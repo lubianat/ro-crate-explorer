@@ -2,13 +2,12 @@
 import RoCrateEntity from '@/components/custom-ui/RoCrateEntity.vue'
 import FileTreeItem from '@/components/custom-ui/FileTreeItem.vue'
 import { ROCrate } from 'ro-crate'
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -436,12 +435,12 @@ const runSearch = async () => {
 
     const data = await response.json();
 
-    if (data && Array.isArray(data.hits)) {
-      // Map the array of hit objects to an array of entity_id strings
-      searchResults.value = data.hits.map((hit: any) => hit.entity_id);
-    } else {
+    if (!(data && Array.isArray(data.hits))) {
       // If 'data' is null, not an object, or 'hits' isn't an array, throw the error.
       throw new Error("Invalid search response format. Expected an object with a 'hits' array.");
+    } else {
+      // Map the array of hit objects to an array of entity_id strings
+      searchResults.value = data.hits.map((hit: any) => hit.entity_id);
     }
 
   } catch (e: any) {
