@@ -216,7 +216,7 @@ const otherEntitiesGroups = computed(() => {
   const filteredGroups: Record<string, any[]> = {};
   for (const groupName in groups) {
     if (!filterText || groupName.toLowerCase().includes(filterText)) {
-      filteredGroups[groupName] = groups[groupName];
+      filteredGroups[groupName] = groups[groupName] ?? [];
     }
   }
 
@@ -405,9 +405,11 @@ const loadFromPastedJson = async () => {
 };
 
 const handleFileUpload = async (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (!target.files || target.files.length === 0) return;
-  const file = target.files[0];
+  const target = event.target as HTMLInputElement | null;
+  const files = target?.files;
+  if (!files || files.length === 0) return;
+  const file = files.item(0);
+  if (!file) return;
 
   isLoading.value = true;
   errorMsg.value = null;
@@ -438,7 +440,9 @@ const handleFileUpload = async (event: Event) => {
     errorMsg.value = `File error: ${e.message}`;
   } finally {
     isLoading.value = false;
-    target.value = '';
+    if (target) {
+      target.value = '';
+    }
   }
 };
 
@@ -577,11 +581,11 @@ const handleSubcrateOpen = (subcrateId: string) => {
 
 const goToBreadcrumb = (index: number) => {
   const target = historyStack.value[index];
-  if (target.url) {
-    historyStack.value = historyStack.value.slice(0, index);
-    inputUrl.value = target.url;
-    loadFromUrl();
-  }
+  if (!target || !target.url) return;
+
+  historyStack.value = historyStack.value.slice(0, index);
+  inputUrl.value = target.url;
+  loadFromUrl();
 }
 
 const goBack = () => {
